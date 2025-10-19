@@ -1,0 +1,108 @@
+# !/bin/bash
+
+source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/icons.sh"
+
+
+
+# This is a demo config to showcase some of the most important commands.
+# It is meant to be changed and configured, as it is intentionally kept sparse.
+# For a (much) more advanced configuration example see my dotfiles:
+# https://github.com/FelixKratz/dotfiles
+ITEM_DIR="$CONFIG_DIR/items"
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+FONT="SF Pro"
+
+##### Bar Appearance #####
+# Configuring the general appearance of the bar.
+# These are only some of the options available. For all options see:
+# https://felixkratz.github.io/SketchyBar/config/bar
+# If you are looking for other colors, see the color picker:
+# https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
+
+# Unload the macOS on screen indicator overlay for volume change
+launchctl unload -F /System/Library/LaunchAgents/com.apple.OSDUIHelper.plist > /dev/null 2>&1 &
+
+bar=(
+  corner_radius=12
+  height=33
+  color=$BAR_COLOR
+  border_width=2
+  border_color=$BAR_BORDER_COLOR
+  shadow=off
+  position=top
+  sticky=on
+  y_offset=0
+  margin=6
+  topmost=window
+)
+
+##### Changing Defaults #####
+# We now change some default values, which are applied to all further items.
+# For a full list of all available item properties see:
+# https://felixkratz.github.io/SketchyBar/config/items
+
+
+
+default=(
+  updates=when_shown
+  icon.font="$FONT:Bold:14.0"
+  icon.color=$ICON_COLOR
+  icon.padding_left=$PADDINGS
+  icon.padding_right=$PADDINGS
+  label.font="$FONT:Semibold:13.0"
+  label.color=$LABEL_COLOR
+  label.padding_left=$PADDINGS
+  label.padding_right=$PADDINGS
+  padding_right=$PADDINGS
+  padding_left=$PADDINGS
+  background.height=26
+  background.corner_radius=9
+  background.border_width=2
+  popup.background.border_width=2
+  popup.background.corner_radius=9
+  popup.background.border_color=$POPUP_BORDER_COLOR
+  popup.background.color=$POPUP_BACKGROUND_COLOR
+  popup.blur_radius=20
+  popup.background.shadow.drawing=on
+)
+sketchybar --bar "${bar[@]}" --default "${default[@]}"
+
+
+
+
+# --- left side Items ---
+source "$ITEM_DIR/front_app.sh"
+source  "$ITEM_DIR/cpu.sh"
+source "$ITEM_DIR/space.sh"
+
+# -- Right side Items ---
+
+
+sketchybar --add alias "TextInputMenuAgent,Item-0" right \
+           --set "TextInputMenuAgent,Item-0" padding_left=0 padding_right=9 label.width=0 update_freq=1
+
+
+
+source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/wifi.sh"
+source "$ITEM_DIR/battery.sh"
+source "$ITEM_DIR/volume.sh"
+
+
+status_bracket=(
+  background.color=$BACKGROUND_1
+  background.border_color=$BACKGROUND_2
+)
+
+sketchybar --add bracket status "TextInputMenuAgent,Item-0" wifi battery github.bell volume_icon \
+           --set status "${status_bracket[@]}"
+
+sketchybar --add event window_focus
+sketchybar --subscribe bar front_app_switched window_focus
+sketchybar --set bar script="$CONFIG_DIR/scripts/toggle_bar.sh"
+
+
+
+
+sketchybar --update
