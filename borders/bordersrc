@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "$CONFIG_DIR/colors.sh"
+
+options=(
+  style=round
+  width=6.0
+  hidpi=off
+  active_color=0xffeed49f 
+  inactive_color=0xff8aadf4
+)
+
+borders "${options[@]}"
