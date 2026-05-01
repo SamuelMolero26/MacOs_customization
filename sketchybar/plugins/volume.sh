@@ -34,6 +34,7 @@ volume_change() {
 
 mouse_clicked() {
   osascript -e "set volume output volume $PERCENTAGE"
+  sketchybar --set volume_icon popup.drawing=off
 }
 
 case "$SENDER" in

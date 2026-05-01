@@ -3,6 +3,8 @@
 front_app=(
   label.font="$FONT:Black:12.0"
   icon.background.drawing=on
+  icon.background.border_width=2
+  icon.background.border_color=0xffeed49f
   display=active
 
   script="$PLUGIN_DIR/front_app.sh"

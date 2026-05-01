@@ -1,5 +1,12 @@
 #!/usr/bin/env sh
 
-LABEL=$(ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}')
+source "$CONFIG_DIR/icons.sh"
+source "$CONFIG_DIR/colors.sh"
 
-sketchybar --set $NAME label=$LABEL
+SSID=$(ipconfig getsummary en0 2>/dev/null | awk -F ' SSID : ' '/ SSID : /{print $2}')
+
+if [ -z "$SSID" ]; then
+  sketchybar --set wifi icon="$WIFI_DISCONNECTED" icon.color="$RED"
+else
+  sketchybar --set wifi icon="$WIFI_CONNECTED" icon.color="$GREEN"
+fi
