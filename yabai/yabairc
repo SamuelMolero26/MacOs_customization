@@ -2,7 +2,9 @@
 
 yabai -m config layout bsp
 
+yabai -m config window_origin_display cursor
 yabai -m config window_placement second_child
+yabai -m config auto_balance off
 
 #padding
 
@@ -17,7 +19,7 @@ yabai -m config mouse_follows_focus on
 
 yabai -m config mouse_modifier ctrl
 # set modifier + left-click drag to move window (default: move)
-yabai -m config mouse_action1 move⁄€€
+yabai -m config mouse_action1 move
 # set modifier + right-click drag to resize window (default: resize)
 yabai -m config mouse_action2 resize
 
@@ -33,6 +35,20 @@ yabai -m rule --add app="^Discord$" manage=off
 yabai -m rule --add app="^Goodnotes$" manage=off
 yabai -m rule --add app="^Stickies$" manage=off
 yabai -m rule --add app="^Proton VPN$" manage=off
+
+# Rebuild tree when plugging monitors (plugged / unplugged)
+yabai -m signal --add event=display_added action="sleep 1; yabai --restart-service"
+yabai -m signal --add event=dispplay_removed action="sleep 1; yabai --restart-service"
+yabai -m signal --add event=display_moved action="sleep 1; yabai --restart-service"
+yabai -m signal --add event=display_resized action="sleep 1; yabai --restart-service"
+
+# Survive Dock crashes / display wake
+yabai -m signal --add event=dock_did_restart action="yabai --start-service"
+yabai -m signal --add event=mission_control_enter action="yabai --start-service"
+yabai -m signal --add event=mission_control_exit action="yabai --start-service"
+
+# yabairc executable and reloadable
+yabai -m signal --add event=display_changed action="sleep 1; yabai --restart-service"
 
 
 yabai -m config external_bar all:32:0
