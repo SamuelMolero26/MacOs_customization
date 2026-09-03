@@ -23,10 +23,10 @@ yabai -m config mouse_action1 move
 # set modifier + right-click drag to resize window (default: resize)
 yabai -m config mouse_action2 resize
 
-yabai -m mouse_drop_action stack
+yabai -m config mouse_drop_action stack
 
 
-yabai -m rule --add app="^System Settings$" layer=above manage=off
+yabai -m rule --add app="^System Settings$" sub-layer=above manage=off
 yabai -m rule --add app="^Calculator$" manage=off
 yabai -m rule --add app="^Music$" manage=off
 yabai -m rule --add app="^Messages$" manage=off
@@ -36,19 +36,11 @@ yabai -m rule --add app="^Goodnotes$" manage=off
 yabai -m rule --add app="^Stickies$" manage=off
 yabai -m rule --add app="^Proton VPN$" manage=off
 
-# Rebuild tree when plugging monitors (plugged / unplugged)
+# Rebuild tree when monitors are physically plugged / unplugged (lid close counts).
+# Only these two events. display_changed fires on every focus change between
+# displays, so restarting on it puts yabai in a permanent restart loop.
 yabai -m signal --add event=display_added action="sleep 1; yabai --restart-service"
-yabai -m signal --add event=dispplay_removed action="sleep 1; yabai --restart-service"
-yabai -m signal --add event=display_moved action="sleep 1; yabai --restart-service"
-yabai -m signal --add event=display_resized action="sleep 1; yabai --restart-service"
-
-# Survive Dock crashes / display wake
-yabai -m signal --add event=dock_did_restart action="yabai --start-service"
-yabai -m signal --add event=mission_control_enter action="yabai --start-service"
-yabai -m signal --add event=mission_control_exit action="yabai --start-service"
-
-# yabairc executable and reloadable
-yabai -m signal --add event=display_changed action="sleep 1; yabai --restart-service"
+yabai -m signal --add event=display_removed action="sleep 1; yabai --restart-service"
 
 
 yabai -m config external_bar all:32:0
