@@ -42,6 +42,28 @@ yabai -m rule --add app="^Proton VPN$" manage=off
 yabai -m signal --add event=display_added action="sleep 1; yabai --restart-service"
 yabai -m signal --add event=display_removed action="sleep 1; yabai --restart-service"
 
+# Tab-tear fix. Dragging a tab out of a browser creates the window while the
+# mouse button is still down, before its AX subrole settles to AXStandardWindow.
+# yabai decides manage-vs-float once at window_created and never re-evaluates,
+# so the torn-out window stays floating until a restart. Re-check after the
+# drag ends and pull it back into the tree.
+#
+# Only rescues windows yabai actually misclassified: real browser popups arrive
+# as AXDialog and are already managed, so they never hit the toggle. A browser
+# you deliberately set manage=off would be defeated by this — add it to the
+# exclusion instead of relying on the rule.
+#
+# Names are prefix-matched so variants come along (Firefox Developer Edition,
+# Safari Technology Preview, Zen Browser, Opera GX). Short names that would
+# collide with non-browsers are anchored: Arc$ (vs Archive Utility), Dia$, Comet$.
+yabai -m signal --add event=window_created \
+  app="^(Safari|Firefox|Google Chrome|Chromium|Brave Browser|Microsoft Edge|Vivaldi|Opera|Arc$|Zen|Orion|LibreWolf|Waterfox|Tor Browser|DuckDuckGo|Thorium|Helium|Sidekick|Yandex|Dia$|Comet$)" \
+  action='
+    sleep 0.3
+    [ "$(yabai -m query --windows --window $YABAI_WINDOW_ID | jq -r ".\"is-floating\"")" = "true" ] \
+      && yabai -m window $YABAI_WINDOW_ID --toggle float
+  '
+
 
 yabai -m config external_bar all:32:0
 
