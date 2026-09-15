@@ -25,6 +25,10 @@ shift + alt - m : yabai -m window --toggle zoom-fullscreen
 # toggle window float
 shift + alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
 
+# rescan windows: torn-out browser tabs are created before their AX reference
+# exists and yabai never retries, so they can't be moved until a restart
+shift + alt - r : yabai --restart-service
+
 # snap floating window below sketchybar
 ctrl + alt - r : yabai -m window --move abs:0:44
 
