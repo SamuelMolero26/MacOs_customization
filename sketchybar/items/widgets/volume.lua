@@ -99,6 +99,16 @@ local function volume_collapse_details()
 end
 
 local current_audio_device = "None"
+-- Cache the availability check so every popup toggle does not fork.
+local has_switch_audio_source = nil
+local function switch_audio_available()
+  if has_switch_audio_source == nil then
+    local ok = os.execute("command -v SwitchAudioSource >/dev/null 2>&1")
+    has_switch_audio_source = (ok == true or ok == 0)
+  end
+  return has_switch_audio_source
+end
+
 local function volume_toggle_details(env)
   if env.BUTTON == "right" then
     sbar.exec("open /System/Library/PreferencePanes/Sound.prefpane")
@@ -108,11 +118,16 @@ local function volume_toggle_details(env)
   local should_draw = volume_bracket:query().popup.drawing == "off"
   if should_draw then
     volume_bracket:set({ popup = { drawing = true } })
+    if not switch_audio_available() then
+      print("volume widget: SwitchAudioSource not installed, skipping device list")
+      return
+    end
+    -- Remove stale device items first so a reload mid-popup cannot orphan them.
+    sbar.remove('/volume.device\\.*/')
     sbar.exec("SwitchAudioSource -t output -c", function(result)
       current_audio_device = result:sub(1, -2)
       sbar.exec("SwitchAudioSource -a -t output", function(available)
-        current = current_audio_device
-        local color = colors.grey
+        local current = current_audio_device
         local counter = 0
 
         for device in string.gmatch(available, '[^\r\n]+') do

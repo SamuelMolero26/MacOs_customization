@@ -4,7 +4,20 @@ local settings = require("settings")
 
 -- Execute the event provider binary which provides the event "network_update"
 -- for the network interface "en0", which is fired every 2.0 seconds.
-sbar.exec("killall network_load >/dev/null; $CONFIG_DIR/helpers/event_providers/network_load/bin/network_load en0 network_update 2.0")
+-- Start the provider only if not already running. No killall on reload.
+sbar.exec("pgrep -x network_load >/dev/null || $CONFIG_DIR/helpers/event_providers/network_load/bin/network_load en0 network_update 2.0")
+
+-- Slow network tools (networksetup can take 2-5s, ipconfig blocks when WiFi
+-- is down, e.g. lid closed / monitor switch flapping the network). Run them
+-- async with a timeout so a stale query can never pile up or hold the popup.
+-- macOS has no GNU timeout by default; use gtimeout when installed.
+local function with_timeout(secs, cmd)
+  return "(command -v gtimeout >/dev/null && gtimeout "
+    .. secs .. " " .. cmd
+    .. " || command -v timeout >/dev/null && timeout "
+    .. secs .. " " .. cmd
+    .. " || " .. cmd .. ")"
+end
 
 local popup_width = 250
 
@@ -173,8 +186,8 @@ wifi_up:subscribe("network_update", function(env)
   })
 end)
 
-wifi:subscribe({"wifi_change", "system_woke"}, function(env)
-  sbar.exec("ipconfig getifaddr en0", function(ip)
+wifi:subscribe({"wifi_change", "system_woke", "display_change"}, function(env)
+  sbar.exec(with_timeout(3, "ipconfig getifaddr en0"), function(ip)
     local connected = not (ip == "")
     wifi:set({
       icon = {
@@ -193,19 +206,19 @@ local function toggle_details()
   local should_draw = wifi_bracket:query().popup.drawing == "off"
   if should_draw then
     wifi_bracket:set({ popup = { drawing = true }})
-    sbar.exec("networksetup -getcomputername", function(result)
+    sbar.exec(with_timeout(3, "networksetup -getcomputername"), function(result)
       hostname:set({ label = result })
     end)
-    sbar.exec("ipconfig getifaddr en0", function(result)
+    sbar.exec(with_timeout(3, "ipconfig getifaddr en0"), function(result)
       ip:set({ label = result })
     end)
-    sbar.exec("ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}'", function(result)
+    sbar.exec(with_timeout(3, "ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}'"), function(result)
       ssid:set({ label = result })
     end)
-    sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Subnet mask: ' '/^Subnet mask: / {print $2}'", function(result)
+    sbar.exec(with_timeout(3, "networksetup -getinfo Wi-Fi | awk -F 'Subnet mask: ' '/^Subnet mask: / {print $2}'"), function(result)
       mask:set({ label = result })
     end)
-    sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Router: ' '/^Router: / {print $2}'", function(result)
+    sbar.exec(with_timeout(3, "networksetup -getinfo Wi-Fi | awk -F 'Router: ' '/^Router: / {print $2}'"), function(result)
       router:set({ label = result })
     end)
   else

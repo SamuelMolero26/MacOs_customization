@@ -4,6 +4,15 @@ local colors = require("colors")
 local whitelist = { ["Spotify"] = true,
                     ["Music"] = true    };
 
+-- nowplaying-cli is optional. Without it the media_change event never fires
+-- and clicks would only spawn shell errors, so leave click scripts empty.
+local nowplaying_ok = os.execute("command -v nowplaying-cli >/dev/null 2>&1")
+local has_nowplaying = (nowplaying_ok == true or nowplaying_ok == 0)
+local function nowplaying_cmd(args)
+  if has_nowplaying then return "nowplaying-cli " .. args end
+  return ""
+end
+
 local media_cover = sbar.add("item", {
   position = "right",
   background = {
@@ -57,19 +66,19 @@ sbar.add("item", {
   position = "popup." .. media_cover.name,
   icon = { string = icons.media.back },
   label = { drawing = false },
-  click_script = "nowplaying-cli previous",
+  click_script = nowplaying_cmd("previous"),
 })
 sbar.add("item", {
   position = "popup." .. media_cover.name,
   icon = { string = icons.media.play_pause },
   label = { drawing = false },
-  click_script = "nowplaying-cli togglePlayPause",
+  click_script = nowplaying_cmd("togglePlayPause"),
 })
 sbar.add("item", {
   position = "popup." .. media_cover.name,
   icon = { string = icons.media.forward },
   label = { drawing = false },
-  click_script = "nowplaying-cli next",
+  click_script = nowplaying_cmd("next"),
 })
 
 local interrupt = 0
@@ -77,7 +86,7 @@ local function animate_detail(detail)
   if (not detail) then interrupt = interrupt - 1 end
   if interrupt > 0 and (not detail) then return end
 
-  sbar.animate("tanh", 30, function()
+  sbar.animate("tanh", 10, function()
     media_artist:set({ label = { width = detail and "dynamic" or 0 } })
     media_title:set({ label = { width = detail and "dynamic" or 0 } })
   end)
