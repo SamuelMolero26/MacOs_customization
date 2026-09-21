@@ -36,11 +36,6 @@ yabai -m rule --add app="^Goodnotes$" manage=off
 yabai -m rule --add app="^Stickies$" manage=off
 yabai -m rule --add app="^Proton VPN$" manage=off
 
-# Rebuild tree when monitors are physically plugged / unplugged (lid close counts).
-# Only these two events. display_changed fires on every focus change between
-# displays, so restarting on it puts yabai in a permanent restart loop.
-yabai -m signal --add event=display_added action="sleep 1; yabai --restart-service"
-yabai -m signal --add event=display_removed action="sleep 1; yabai --restart-service"
 
 
 yabai -m config external_bar all:32:0

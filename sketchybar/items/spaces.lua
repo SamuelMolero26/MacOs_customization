@@ -110,8 +110,11 @@ window_focus_observer:subscribe("window_focus", function(env)
   set_space_highlight(tonumber(env.space_id))
 end)
 
+-- space_change INFO is per-display JSON, not an index; ask yabai for the focused one.
 window_focus_observer:subscribe("space_change", function(env)
-  set_space_highlight(tonumber(env.INFO))
+  sbar.exec("yabai -m query --spaces --space", function(space)
+    set_space_highlight(space.index)
+  end)
 end)
 
 local spaces_indicator = sbar.add("item", {
@@ -137,6 +140,9 @@ local spaces_indicator = sbar.add("item", {
 })
 
 space_window_observer:subscribe("space_windows_change", function(env)
+  -- ponytail: only spaces 1-10 exist; display reconfig sends indices outside that.
+  local space = spaces[env.INFO.space]
+  if not space then return end
   local icon_line = ""
   local no_app = true
   for app, count in pairs(env.INFO.apps) do
@@ -150,7 +156,7 @@ space_window_observer:subscribe("space_windows_change", function(env)
     icon_line = " —"
   end
   sbar.animate("tanh", 10, function()
-    spaces[env.INFO.space]:set({ label = icon_line })
+    space:set({ label = icon_line })
   end)
 end)
 
