@@ -35,6 +35,8 @@ yabai -m rule --add app="^Discord$" manage=off
 yabai -m rule --add app="^Goodnotes$" manage=off
 yabai -m rule --add app="^Stickies$" manage=off
 yabai -m rule --add app="^Proton VPN$" manage=off
+yabai -m rule --add app="^Muse$" manage=off
+yabai -m rule --add app="^freewrite$" manage=off
 
 
 
