@@ -1,0 +1,16 @@
+
+* {
+    background-color: #1e1e2e;
+    text-color: #cdd6f4;
+    font: "JetBrains Mono 14";
+}
+window {
+    width: 40%;
+    padding: 12px;
+    border: 2px;
+    border-color: #89b4fa;
+}
+element selected normal {
+    background-color: #89b4fa;
+    text-color: #1e1e2e;
+}

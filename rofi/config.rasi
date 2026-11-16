@@ -1,0 +1,7 @@
+
+configuration {
+    lines: 10;
+    location: 0;
+}
+
+@theme "midnight"
