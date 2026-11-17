@@ -75,6 +75,8 @@ shift + alt - 0x1B : yabai -m window --resize rel:-40:-40
 # --- Reload / recovery ---
 # skhd hotloads this file on save; this binding forces a reload by hand.
 shift + alt - e : killall -USR1 skhd
+
 # --- rofi ---
 ctrl + alt - space : ~/.local/bin/rofi-launch
 ctrl + alt - f : ~/.local/bin/rofi -show filebrowser -show-icons
+ctrl + alt - w : ~/.local/bin/rofi -show window -show-icons
